@@ -5,10 +5,10 @@ const XLSX = require('excel4node')
 const _ = require('lodash')
 const fs = require('fs-extra')
 const moment = require('moment')
+const timezone = require('moment-timezone')
 const randomstring = require('randomstring')
 const readline = require('readline')
 
-const CBL = require('./cbl-export')
 const COL = require('./column')
 
 const { google } = require('googleapis')
@@ -46,9 +46,12 @@ const TOKEN_PATH = 'token.json'
 const CHART_SHEET_NAME = '차트 데이터'
 
 const SHEETS_OPTION = [
-  { key: 'raw',       name: '원시데이터',     theme: 'data' },
-  { key: 'primary',   name: '제안서',        theme: 'detail' },
-  { key: 'secondary', name: '계량데이터',     theme: 'data' }
+  { key: 'raw',          name: '원시데이터',      theme: 'data' },
+  { key: 'primary',      name: '제안서',         theme: 'detail' },
+  { key: 'secondary',    name: '계량데이터',      theme: 'data' },
+  { key: 'days.usage',   name: '사용량차트',      theme: 'chart', to: 'primary', r: 10, c: COL.A, x: 10, y: 24 },
+  { key: 'days.cbl.max', name: 'MAX 차트',  theme: 'chart', to: 'primary', r: 10, c: COL.I, x: 10, y: 24 },
+  { key: 'days.cbl.mid', name: 'MID 차트',  theme: 'chart', to: 'primary', r: 10, c: COL.Q, x: 10, y: 24 }
 ]
 
 const SHEET_STYLE = {
@@ -1027,8 +1030,8 @@ app.get('/download', function(req, res) {
 
           workbook.write(uploadDir + serial + extension, async (error, status) => {
             if (error) {
-              res.json({ status: 'error', message: 'RRMSE 분석 결과를 엑셀로 변환하지 못했습니다.' })
-              console.log('[Error] RRMSE 분석 결과를 엑셀로 변환하지 못했습니다.')
+              res.json({ status: 'error', message: '분석 결과를 엑셀로 변환하지 못했습니다.' })
+              console.log('[Error] 분석 결과를 엑셀로 변환하지 못했습니다.')
             } else {
               console.log('6. Excel File Upload')
               let sheetData = await createSheetFile(uploadDir, serial, extension)
